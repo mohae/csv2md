@@ -24,6 +24,8 @@ var (
 	trimLeadingSpace bool
 )
 
+var prog = filepath.Base(os.Args[0])
+
 func init() {
 	flag.BoolVar(&format, "format", false, "if a format file should be used; this flag assumes that it is in the same location as input with a .fmt ext")
 	flag.BoolVar(&format, "f", false, "the short flag for -format")
@@ -47,12 +49,27 @@ func init() {
 	flag.BoolVar(&help, "h", false, "the short flag for -help")
 }
 
+func usage() {
+	fmt.Fprintf(os.Stderr, "Usage:\n")
+	fmt.Fprintf(os.Stderr, "  %s [OPTS]\n", prog)
+	fmt.Fprintf(os.Stderr, "\n")
+	fmt.Fprintf(os.Stderr, "Creates Github Style Markdown tables from CSV-encoded data\n")
+	fmt.Fprintf(os.Stderr, "\n")
+	fmt.Fprintf(os.Stderr, "Options:\n")
+	flag.PrintDefaults()
+}
+
 func main() {
 	os.Exit(realMain())
 }
 
 func realMain() int {
+	flag.Usage = usage
 	flag.Parse()
+	if flag.NArg() == 0 {
+		flag.Usage()
+		os.Exit(2)
+	}
 	// check args; there shouldn't be any, but this is in case help was
 	// used without the flag prefix
 	args := flag.Args()
@@ -63,7 +80,7 @@ func realMain() int {
 		}
 	}
 	if help {
-		fmt.Println("help output")
+		usage()
 		return 0
 	}
 	var in, out, formatR *os.File
