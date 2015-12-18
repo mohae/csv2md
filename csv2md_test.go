@@ -6,7 +6,7 @@ import (
 )
 
 func TestSetFieldNames(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		fields []string
 	}{
 		{[]string{""}},
@@ -28,13 +28,13 @@ func TestSetFieldNames(t *testing.T) {
 }
 
 func TestSetFieldAlignment(t *testing.T) {
-	tests := []struct{
-		fields []string
+	tests := []struct {
+		fields   []string
 		expected []string
 	}{
 		{},
-		{[]string{""}, []string{" -- "}},
-		{[]string{"l", "left", "r", "right", "c", "center", "centered", ""}, []string{" :-- ", " :-- ", " --: ", " --: ", " :--: ", " :--: ", " :--: ", " -- "}},
+		{[]string{""}, []string{"---"}},
+		{[]string{"l", "left", "r", "right", "c", "center", "centered", ""}, []string{":--", ":--", "--:", "--:", ":--:", ":--:", ":--:", "---"}},
 	}
 	for i, test := range tests {
 		calvin := Transmogrifier{}
@@ -51,8 +51,8 @@ func TestSetFieldAlignment(t *testing.T) {
 }
 
 func TestSetFieldFmt(t *testing.T) {
-	tests := []struct{
-		fields []string
+	tests := []struct {
+		fields   []string
 		expected []string
 	}{
 		{},
@@ -80,7 +80,7 @@ func TestSetFmt(t *testing.T) {
 	h := []byte("a,b,c,d\nl,c,r,\ni,b,s,\n")
 	hR := bytes.NewReader(h)
 	expectedNames := []string{"a", "b", "c", "d"}
-	expectedAlignment := []string{" :-- ", " :--: ", " --: ", " -- "}
+	expectedAlignment := []string{":--", ":--:", "--:", "---"}
 	expectedFmt := []string{"_", "__", "~~", ""}
 	calvin := NewTransmogrifier(r, &w)
 	err := calvin.SetFmt(hR)
@@ -119,14 +119,14 @@ func TestSetFmt(t *testing.T) {
 func TestMDTable(t *testing.T) {
 	csvData := []byte("Manufacturer,Model,Type,Year\nFord,Focus,Sedan,2015\nChevy,Malibu,Sedan,2015\n")
 	format := []byte("Make,Model,Type,Yr\nc, l, left, right\nbold, italic, ,strikethrough\n")
-	tests := []struct{
-		useFmt bool
+	tests := []struct {
+		useFmt    bool
 		hasHeader bool
-		expected string
+		expected  string
 	}{
-		{false, true, "Manufacturer|Model|Type|Year\n -- | -- | -- | -- \nFord|Focus|Sedan|2015\nChevy|Malibu|Sedan|2015\n"},
-		{true, false, "Make|Model|Type|Yr\n :--: | :-- | :-- | --: \n__Manufacturer__|_Model_|Type|~~Year~~\n__Ford__|_Focus_|Sedan|~~2015~~\n__Chevy__|_Malibu_|Sedan|~~2015~~\n"},
-		{true, true, "Make|Model|Type|Yr\n :--: | :-- | :-- | --: \n__Ford__|_Focus_|Sedan|~~2015~~\n__Chevy__|_Malibu_|Sedan|~~2015~~\n"},
+		{false, true, "Manufacturer|Model|Type|Year  \n---|---|---|---  \nFord|Focus|Sedan|2015  \nChevy|Malibu|Sedan|2015  \n"},
+		{true, false, "Make|Model|Type|Yr  \n:--:|:--|:--|--:  \n__Manufacturer__|_Model_|Type|~~Year~~  \n__Ford__|_Focus_|Sedan|~~2015~~  \n__Chevy__|_Malibu_|Sedan|~~2015~~  \n"},
+		{true, true, "Make|Model|Type|Yr  \n:--:|:--|:--|--:  \n__Ford__|_Focus_|Sedan|~~2015~~  \n__Chevy__|_Malibu_|Sedan|~~2015~~  \n"},
 	}
 	for i, test := range tests {
 		var w bytes.Buffer
@@ -141,7 +141,7 @@ func TestMDTable(t *testing.T) {
 				continue
 			}
 		}
-		err := calvin.MdTable()
+		err := calvin.MDTable()
 		if err != nil {
 			t.Errorf("%d: unexpected error creating mdtable: %s", i, err)
 			continue

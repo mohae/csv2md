@@ -19,15 +19,15 @@ import (
 )
 
 const (
-	left  = ":--"
-	centered = ":--:"
-	right = "--:"
-	none = "---"
-	italic = "_"
-	bold = "__"
+	left          = ":--"
+	centered      = ":--:"
+	right         = "--:"
+	none          = "---"
+	italic        = "_"
+	bold          = "__"
 	strikethrough = "~~"
-
 )
+
 type ShortWriteError struct {
 	n         int
 	written   int
@@ -48,14 +48,14 @@ type Transmogrifier struct {
 	HasHeaderRecord bool
 	// CSV is a csv.Reader.  The fields are exposed so that the caller
 	// can configure.
-	CSV *csv.Reader
-	w io.Writer
-	fieldNames []string
+	CSV            *csv.Reader
+	w              io.Writer
+	fieldNames     []string
 	fieldAlignment []string
-	fieldFmt []string
-	newLine string
-	rBytes int
-	wBytes int
+	fieldFmt       []string
+	newLine        string
+	rBytes         int
+	wBytes         int
 }
 
 func NewTransmogrifier(r io.Reader, w io.Writer) *Transmogrifier {
@@ -119,7 +119,7 @@ func (t *Transmogrifier) SetFieldAlignment(vals []string) {
 	return
 }
 
-func (t *Transmogrifier) SetFieldFmt(vals []string)  {
+func (t *Transmogrifier) SetFieldFmt(vals []string) {
 	for _, v := range vals {
 		v = strings.TrimSpace(strings.ToLower(v))
 		switch v {
@@ -142,33 +142,33 @@ func (t *Transmogrifier) SetFieldFmt(vals []string)  {
 // actual CSV data; e.g. if the CSV data is tab delimited, the format file
 // will also be tab delimited.
 func (t *Transmogrifier) SetFmt(r io.Reader) error {
-		c := csv.NewReader(r)
-		// make sure this reader's settings are consistent with CSV's
-		c.Comma = t.CSV.Comma
-		c.Comment = t.CSV.Comment
-		c.FieldsPerRecord = t.CSV.FieldsPerRecord
-		c.LazyQuotes = t.CSV.LazyQuotes
-		c.TrailingComma = t.CSV.TrailingComma
-		c.TrimLeadingSpace = t.CSV.TrimLeadingSpace
-		records, err := c.ReadAll()
-		if err != nil {
-			return err
-		}
-		if len(records) == 0 {
-			return fmt.Errorf("no format data found")
-		}
-		// first row is assumed to be the field names
-		t.fieldNames = make([]string, len(records[0]))
-		copy(t.fieldNames, records[0])
-		// second row is field alignment, if it exists
-		if len(records) > 1 {
-			t.SetFieldAlignment(records[1])
-		}
-		// third row is text formatting for each field, if it exists
-		if len(records) > 2 {
-			t.SetFieldFmt(records[2])
-		}
-		return nil
+	c := csv.NewReader(r)
+	// make sure this reader's settings are consistent with CSV's
+	c.Comma = t.CSV.Comma
+	c.Comment = t.CSV.Comment
+	c.FieldsPerRecord = t.CSV.FieldsPerRecord
+	c.LazyQuotes = t.CSV.LazyQuotes
+	c.TrailingComma = t.CSV.TrailingComma
+	c.TrimLeadingSpace = t.CSV.TrimLeadingSpace
+	records, err := c.ReadAll()
+	if err != nil {
+		return err
+	}
+	if len(records) == 0 {
+		return fmt.Errorf("no format data found")
+	}
+	// first row is assumed to be the field names
+	t.fieldNames = make([]string, len(records[0]))
+	copy(t.fieldNames, records[0])
+	// second row is field alignment, if it exists
+	if len(records) > 1 {
+		t.SetFieldAlignment(records[1])
+	}
+	// third row is text formatting for each field, if it exists
+	if len(records) > 2 {
+		t.SetFieldFmt(records[2])
+	}
+	return nil
 }
 
 func (t *Transmogrifier) MDTable() error {
@@ -259,7 +259,7 @@ func (t *Transmogrifier) writeRecord(fields []string) error {
 		if format {
 			field = fmt.Sprintf("%s%s%s", t.fieldFmt[i], field, t.fieldFmt[i])
 		}
-		if i < end  {
+		if i < end {
 			field = fmt.Sprintf("%s|", field)
 		}
 		t.wBytes, err = t.w.Write([]byte(field))

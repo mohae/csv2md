@@ -12,17 +12,16 @@ import (
 
 // flags
 var (
-	format bool
-	formatFile string
-	input string
-	help bool
-	lazyQuotes bool
-	newLine string
-	noHeaderRecord bool
-	output string
-	separator string
+	format           bool
+	formatFile       string
+	input            string
+	help             bool
+	lazyQuotes       bool
+	newLine          string
+	noHeaderRecord   bool
+	output           string
+	separator        string
 	trimLeadingSpace bool
-
 )
 
 func init() {
@@ -102,7 +101,7 @@ func realMain() int {
 		// build the filepath from the input, if input is stdin error
 		formatFile = fmt.Sprintf("%s.fmt", strings.TrimSuffix(input, filepath.Ext(input)))
 	}
-		// format stuff
+	// format stuff
 	if len(formatFile) > 0 {
 		// if the format file is specified use that
 		formatR, err = os.OpenFile(formatFile, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
