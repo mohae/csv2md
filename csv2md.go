@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	left  = " :-- "
-	right = " --: "
-	centered = " :--: "
-	none = " -- "
+	left  = ":--"
+	centered = ":--:"
+	right = "--:"
+	none = "---"
 	italic = "_"
 	bold = "__"
 	strikethrough = "~~"
@@ -59,7 +59,42 @@ type Transmogrifier struct {
 }
 
 func NewTransmogrifier(r io.Reader, w io.Writer) *Transmogrifier {
-	return &Transmogrifier{HasHeaderRecord: true, CSV: csv.NewReader(r), w: w, newLine: "\n"}
+	return &Transmogrifier{HasHeaderRecord: true, CSV: csv.NewReader(r), w: w, newLine: "  \n"}
+}
+
+// SetNewLine sets the newLine value based on the received value.  If the
+// received value is not recognized, nothing is done.
+//
+// Recognized values:
+//    * Carriage Return (new line)
+//      * cr
+//      * CR
+//      * \n
+//    * Line Feed
+//      * lf
+//      * LF
+//      * \r
+//    * Carriage Return/Line Feed
+//      * crlf
+//      * CRLF
+//      * \r\n
+//
+// For a new line to occur, Markdown requires the line to terminate with
+// either two spaces, "  ", or have a double line feed.  The newLine is
+// prefixed with two spaces.
+func (t *Transmogrifier) SetNewLine(s string) {
+	switch s {
+	case "cr", "CR", "\n":
+		t.newLine = "  \n"
+	case "lf", "LF", "\r":
+		t.newLine = "  \r"
+	case "crlf", "CRLF", "\r\n":
+		t.newLine = "   \r"
+	}
+}
+
+func (t *Transmogrifier) NewLine() string {
+	return t.newLine
 }
 
 func (t *Transmogrifier) SetFieldNames(vals []string) {
@@ -136,7 +171,7 @@ func (t *Transmogrifier) SetFmt(r io.Reader) error {
 		return nil
 }
 
-func (t *Transmogrifier) MdTable() error {
+func (t *Transmogrifier) MDTable() error {
 	// if the field names are set, write those first
 	if len(t.fieldNames) > 0 {
 		err := t.writeHeaderRecord(t.fieldNames)
