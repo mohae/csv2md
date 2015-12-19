@@ -106,11 +106,11 @@ func (t *Transmogrifier) SetFieldAlignment(vals []string) {
 	for _, v := range vals {
 		v = strings.TrimSpace(strings.ToLower(v))
 		switch v {
-		case "l", "left":
+		case "l", "left", left:
 			t.fieldAlignment = append(t.fieldAlignment, left)
-		case "c", "center", "centered":
+		case "c", "center", "centered", centered:
 			t.fieldAlignment = append(t.fieldAlignment, centered)
-		case "r", "right":
+		case "r", "right", right:
 			t.fieldAlignment = append(t.fieldAlignment, right)
 		default:
 			t.fieldAlignment = append(t.fieldAlignment, none)
@@ -123,11 +123,11 @@ func (t *Transmogrifier) SetFieldFmt(vals []string) {
 	for _, v := range vals {
 		v = strings.TrimSpace(strings.ToLower(v))
 		switch v {
-		case "b", "bold":
+		case "b", "bold", bold:
 			t.fieldFmt = append(t.fieldFmt, bold)
-		case "i", "italic", "italics":
+		case "i", "italic", "italics", italic:
 			t.fieldFmt = append(t.fieldFmt, italic)
-		case "s", "strikethrough":
+		case "s", "strikethrough", strikethrough:
 			t.fieldFmt = append(t.fieldFmt, strikethrough)
 		default:
 			t.fieldFmt = append(t.fieldFmt, "")

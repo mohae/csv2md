@@ -34,6 +34,7 @@ func TestSetFieldAlignment(t *testing.T) {
 	}{
 		{},
 		{[]string{""}, []string{"---"}},
+		{[]string{"", ":--", "l", "", ":--:", "", "--:", "-"}, []string{"---", ":--", ":--", "---", ":--:", "---", "--:", "---"}},
 		{[]string{"l", "left", "r", "right", "c", "center", "centered", ""}, []string{":--", ":--", "--:", "--:", ":--:", ":--:", ":--:", "---"}},
 	}
 	for i, test := range tests {
@@ -57,6 +58,7 @@ func TestSetFieldFmt(t *testing.T) {
 	}{
 		{},
 		{[]string{""}, []string{""}},
+		{[]string{"", "_", "italic", "", "__", "~~", "adsf"}, []string{"", "_", "_", "", "__", "~~", ""}},
 		{[]string{"i", "italic", "italics", "b", "bold", "s", "strikethrough", "z", ""}, []string{"_", "_", "_", "__", "__", "~~", "~~", "", ""}},
 	}
 	for i, test := range tests {
