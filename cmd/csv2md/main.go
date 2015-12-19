@@ -66,9 +66,9 @@ func main() {
 func realMain() int {
 	flag.Usage = usage
 	flag.Parse()
-	if flag.NArg() == 0 {
+	if flag.NArg() > 0 {
 		flag.Usage()
-		os.Exit(2)
+		return 2
 	}
 	// check args; there shouldn't be any, but this is in case help was
 	// used without the flag prefix
@@ -80,7 +80,7 @@ func realMain() int {
 		}
 	}
 	if help {
-		usage()
+		flag.Usage()
 		return 0
 	}
 	var in, out, formatR *os.File
@@ -90,7 +90,7 @@ func realMain() int {
 	if input != "stdin" {
 		in, err = os.Open(input)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "input file error: %s", err)
+			fmt.Fprintf(os.Stderr, "input file error: %s\n", err)
 			return 1
 		}
 	}
@@ -100,7 +100,7 @@ func realMain() int {
 	if output != "stdout" {
 		out, err = os.OpenFile(output, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "output file error: %s", err)
+			fmt.Fprintf(os.Stderr, "output file error: %s\n", err)
 			return 1
 		}
 		defer out.Close()
@@ -123,7 +123,7 @@ func realMain() int {
 		// if the format file is specified use that
 		formatR, err = os.OpenFile(formatFile, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "format file error: %s", err)
+			fmt.Fprintf(os.Stderr, "format file error: %s\n", err)
 			return 1
 		}
 	}
@@ -140,7 +140,7 @@ func realMain() int {
 	t.SetFmt(formatR)
 	err = t.MDTable()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "transmogrifierication error: %s", err)
+		fmt.Fprintf(os.Stderr, "transmogrifierication error: %s\n", err)
 		return 1
 	}
 	return 0
