@@ -3,7 +3,7 @@
 
 csv2md transmogrifies CSV-encoded data into GitHub Flavored Markdown, GFM, tables.
 
-Formatting of fields is supported. Text can have no justification, or be: left justified, centered, or right justified.  Text can either be un-styled or styled with bold, italic, or strikethrough styling.  Formatting is per column, field, and does not apply to the table header row, record.
+Formatting of fields is supported. Text can either have no justification or be left justified, centered, or right justified.  Text can either be un-styled or styled with bold, italic, or strikethrough styling.  Formatting is per column, field, and does not apply to the table header row, record.
 
 For more details see https://help.github.com/articles/github-flavored-markdown/#tables.
 
