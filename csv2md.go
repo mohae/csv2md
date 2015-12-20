@@ -64,8 +64,8 @@ type Transmogrifier struct {
 	wBytes         int64
 }
 
-// NewTrnasmogrifier returns an initialized Transmogrifier for
-// transmogrifierication of CSV-encoded data to GitHub Style Markdown
+// NewTransmogrifier returns an initialized Transmogrifier for
+// transmogrifierication of CSV-encoded data to GitHub Flavored Markdown
 // tables.
 func NewTransmogrifier(r io.Reader, w io.Writer) *Transmogrifier {
 	return &Transmogrifier{HasHeaderRecord: true, CSV: csv.NewReader(r), w: w, newLine: "  \n"}
@@ -225,7 +225,7 @@ func (t *Transmogrifier) SetFmt(r io.Reader) error {
 }
 
 // MDTable reads from the configured reader, CSV, and transforms the data
-// into a GitHub Style Markdown table with the applicable justification and
+// into a GitHub Flavored Markdown table with the applicable justification and
 // text styling.
 func (t *Transmogrifier) MDTable() error {
 	// if the field names are set, write those first
