@@ -13,6 +13,7 @@ package csv2md
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -35,8 +36,10 @@ type ShortWriteError struct {
 }
 
 func (e ShortWriteError) Error() string {
-	return fmt.Sprintf("short write of %s: wrote %d bytes of %d", e.operation, e.n, e.written)
+	return fmt.Sprintf("%s: short write of, wrote %d of %d bytes", e.operation, e.n, e.written)
 }
+
+var ErrNoFormatData = errors.New("no format data")
 
 // Transmogrifier turns CSV data into a markdown table
 type Transmogrifier struct {
@@ -54,12 +57,16 @@ type Transmogrifier struct {
 	fieldAlignment []string
 	fieldFmt       []string
 	newLine        string
-	rBytes         int
-	wBytes         int
+	rBytes         int64
+	wBytes         int64
 }
 
 func NewTransmogrifier(r io.Reader, w io.Writer) *Transmogrifier {
 	return &Transmogrifier{HasHeaderRecord: true, CSV: csv.NewReader(r), w: w, newLine: "  \n"}
+}
+
+func (t *Transmogrifier) BytesWritten() int64 {
+	return t.wBytes
 }
 
 // SetNewLine sets the newLine value based on the received value.  If the
@@ -155,7 +162,7 @@ func (t *Transmogrifier) SetFmt(r io.Reader) error {
 		return err
 	}
 	if len(records) == 0 {
-		return fmt.Errorf("no format data found")
+		return ErrNoFormatData
 	}
 	// first row is assumed to be the field names
 	t.fieldNames = make([]string, len(records[0]))
@@ -210,20 +217,29 @@ func (t *Transmogrifier) MDTable() error {
 
 func (t *Transmogrifier) writeHeaderRecord(fields []string) error {
 	var err error
+	var n int
 	end := len(fields) - 1
 	for i, field := range fields {
 		if i < end {
 			field = fmt.Sprintf("%s|", field)
 		}
-		t.wBytes, err = t.w.Write([]byte(field))
+		n, err = t.w.Write([]byte(field))
 		if err != nil {
 			return err
 		}
+		if n != len(field) {
+			return ShortWriteError{n: len(field), written: n, operation: "header field"}
+		}
+		t.wBytes += int64(n)
 	}
-	t.wBytes, err = t.w.Write([]byte(t.newLine))
+	n, err = t.w.Write([]byte(t.newLine))
 	if err != nil {
 		return err
 	}
+	if n != len(t.newLine) {
+		return ShortWriteError{n: len(t.newLine), written: n, operation: "new line"}
+	}
+	t.wBytes += int64(n)
 	// write the header record separator
 	if len(t.fieldAlignment) == 0 {
 		// no field alignment was set, just write out the separator row
@@ -232,12 +248,23 @@ func (t *Transmogrifier) writeHeaderRecord(fields []string) error {
 			if i < end {
 				val = fmt.Sprintf("%s|", val)
 			}
-			t.wBytes, err = t.w.Write([]byte(val))
+			n, err = t.w.Write([]byte(val))
 			if err != nil {
 				return err
 			}
+			if n != len(val) {
+				return ShortWriteError{n: len(val), written: n, operation: "header row separator"}
+			}
+			t.wBytes += int64(n)
 		}
-		t.wBytes, err = t.w.Write([]byte(t.newLine))
+		n, err = t.w.Write([]byte(t.newLine))
+		if err != nil {
+			return err
+		}
+		if n != len(t.newLine) {
+			return ShortWriteError{n: len(t.newLine), written: n, operation: "new line"}
+		}
+		t.wBytes += int64(n)
 		return nil
 	}
 	end = len(t.fieldAlignment) - 1
@@ -245,14 +272,29 @@ func (t *Transmogrifier) writeHeaderRecord(fields []string) error {
 		if i < end {
 			field = fmt.Sprintf("%s|", field)
 		}
-		t.wBytes, err = t.w.Write([]byte(field))
+		n, err = t.w.Write([]byte(field))
+		if err != nil {
+			return err
+		}
+		if n != len(field) {
+			return ShortWriteError{n: len(field), written: n, operation: "header row separator"}
+		}
+		t.wBytes += int64(n)
 	}
-	t.wBytes, err = t.w.Write([]byte(t.newLine))
+	n, err = t.w.Write([]byte(t.newLine))
+	if err != nil {
+		return err
+	}
+	if n != len(t.newLine) {
+		return ShortWriteError{n: len(t.newLine), written: n, operation: "new line"}
+	}
+	t.wBytes += int64(n)
 	return err
 }
 
 func (t *Transmogrifier) writeRecord(fields []string) error {
 	var err error
+	var n int
 	format := len(t.fieldFmt) > 0
 	end := len(fields) - 1
 	for i, field := range fields {
@@ -262,11 +304,22 @@ func (t *Transmogrifier) writeRecord(fields []string) error {
 		if i < end {
 			field = fmt.Sprintf("%s|", field)
 		}
-		t.wBytes, err = t.w.Write([]byte(field))
+		n, err = t.w.Write([]byte(field))
 		if err != nil {
 			return err
 		}
+		if n != len(field) {
+			return ShortWriteError{n: len(field), written: n, operation: "record field"}
+		}
+		t.wBytes += int64(n)
 	}
-	t.wBytes, err = t.w.Write([]byte(t.newLine))
+	n, err = t.w.Write([]byte(t.newLine))
+	if err != nil {
+		return err
+	}
+	if n != len(t.newLine) {
+		return ShortWriteError{n: len(t.newLine), written: n, operation: "new line"}
+	}
+	t.wBytes += int64(n)
 	return err
 }
