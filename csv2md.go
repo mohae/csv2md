@@ -58,7 +58,7 @@ type Transmogrifier struct {
 	w              io.Writer
 	fieldNames     []string
 	fieldAlignment []string
-	fieldFmt       []string
+	fieldStyle     []string
 	newLine        string
 	rBytes         int64
 	wBytes         int64
@@ -177,13 +177,13 @@ func (t *Transmogrifier) SetFieldStyle(vals []string) {
 		v = strings.TrimSpace(strings.ToLower(v))
 		switch v {
 		case "b", "bold", bold:
-			t.fieldFmt = append(t.fieldFmt, bold)
+			t.fieldStyle = append(t.fieldStyle, bold)
 		case "i", "italic", "italics", italic:
-			t.fieldFmt = append(t.fieldFmt, italic)
+			t.fieldStyle = append(t.fieldStyle, italic)
 		case "s", "strikethrough", strikethrough:
-			t.fieldFmt = append(t.fieldFmt, strikethrough)
+			t.fieldStyle = append(t.fieldStyle, strikethrough)
 		default:
-			t.fieldFmt = append(t.fieldFmt, "")
+			t.fieldStyle = append(t.fieldStyle, "")
 		}
 	}
 }
@@ -344,11 +344,11 @@ func (t *Transmogrifier) writeHeaderRecord(fields []string) error {
 func (t *Transmogrifier) writeRecord(fields []string) error {
 	var err error
 	var n int
-	format := len(t.fieldFmt) > 0
+	format := len(t.fieldStyle) > 0
 	end := len(fields) - 1
 	for i, field := range fields {
 		if format {
-			field = fmt.Sprintf("%s%s%s", t.fieldFmt[i], field, t.fieldFmt[i])
+			field = fmt.Sprintf("%s%s%s", t.fieldStyle[i], field, t.fieldStyle[i])
 		}
 		if i < end {
 			field = fmt.Sprintf("%s|", field)

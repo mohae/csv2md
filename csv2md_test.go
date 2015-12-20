@@ -51,7 +51,7 @@ func TestSetFieldAlignment(t *testing.T) {
 	}
 }
 
-func TestSetFieldFmt(t *testing.T) {
+func TestSetFieldStyle(t *testing.T) {
 	tests := []struct {
 		fields   []string
 		expected []string
@@ -63,11 +63,11 @@ func TestSetFieldFmt(t *testing.T) {
 	}
 	for i, test := range tests {
 		calvin := Transmogrifier{}
-		calvin.SetFieldFmt(test.fields)
-		if len(calvin.fieldFmt) != len(test.expected) {
-			t.Errorf("%d field fmt count: got %d want %d", i, len(calvin.fieldFmt), len(test.expected))
+		calvin.SetFieldStyle(test.fields)
+		if len(calvin.fieldStyle) != len(test.expected) {
+			t.Errorf("%d field style count: got %d want %d", i, len(calvin.fieldStyle), len(test.expected))
 		}
-		for j, v := range calvin.fieldFmt {
+		for j, v := range calvin.fieldStyle {
 			if v != test.expected[j] {
 				t.Errorf("%d, %d: got %s want %s", i, j, v, test.expected[j])
 			}
@@ -107,12 +107,12 @@ func TestSetFmt(t *testing.T) {
 			}
 		}
 	}
-	if len(calvin.fieldFmt) != len(expectedFmt) {
-		t.Errorf("fieldFmt len was %d, want %d", len(calvin.fieldFmt), len(expectedFmt))
+	if len(calvin.fieldStyle) != len(expectedFmt) {
+		t.Errorf("fieldStyle len was %d, want %d", len(calvin.fieldStyle), len(expectedFmt))
 	} else {
-		for i, v := range calvin.fieldFmt {
+		for i, v := range calvin.fieldStyle {
 			if v != expectedFmt[i] {
-				t.Errorf("%d: fieldFmt was %s, want %s", i, v, expectedFmt[i])
+				t.Errorf("%d: fieldStyle was %s, want %s", i, v, expectedFmt[i])
 			}
 		}
 	}
