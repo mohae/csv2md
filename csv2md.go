@@ -52,8 +52,8 @@ type Transmogrifier struct {
 	// case, the number of fields must match the number of fields per
 	// record in the CSV data.
 	HasHeaderRecord bool
-	// CSV is a csv.Reader.  The fields are exposed so that the caller
-	// can configure.
+	// CSV is a csv.Reader.  This is exported so that the caller can
+	// can configure the CSV reader.
 	CSV            *csv.Reader
 	w              io.Writer
 	fieldNames     []string
@@ -224,9 +224,9 @@ func (t *Transmogrifier) SetFmt(r io.Reader) error {
 	return nil
 }
 
-// MDTable reads from the configured reader, CSV, and transforms the data
-// into a GitHub Flavored Markdown table with the applicable justification and
-// text styling.
+// MDTable reads from the configured reader, CSV, transforms the data into
+// a GitHub Flavored Markdown table, applying justification and text
+// styling, and writes the resulting bytes to the Transmogrifier's writer.
 func (t *Transmogrifier) MDTable() error {
 	// if the field names are set, write those first
 	if len(t.fieldNames) > 0 {
