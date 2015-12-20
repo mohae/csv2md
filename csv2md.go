@@ -29,6 +29,8 @@ const (
 	strikethrough = "~~"
 )
 
+// ShortWriteError occurs when the number of bytes written is less than
+// the number of bytes to be written.
 type ShortWriteError struct {
 	n         int
 	written   int
@@ -39,6 +41,7 @@ func (e ShortWriteError) Error() string {
 	return fmt.Sprintf("%s: short write of, wrote %d of %d bytes", e.operation, e.n, e.written)
 }
 
+// ErrNoFormatData occurs when no data is found in the provided reader.
 var ErrNoFormatData = errors.New("no format data")
 
 // Transmogrifier turns CSV data into a markdown table
@@ -61,10 +64,14 @@ type Transmogrifier struct {
 	wBytes         int64
 }
 
+// NewTrnasmogrifier returns an initialized Transmogrifier for
+// transmogrifierication of CSV-encoded data to GitHub Style Markdown
+// tables.
 func NewTransmogrifier(r io.Reader, w io.Writer) *Transmogrifier {
 	return &Transmogrifier{HasHeaderRecord: true, CSV: csv.NewReader(r), w: w, newLine: "  \n"}
 }
 
+// BytesWritten returns the number of bytes written to the writer.
 func (t *Transmogrifier) BytesWritten() int64 {
 	return t.wBytes
 }
@@ -72,7 +79,7 @@ func (t *Transmogrifier) BytesWritten() int64 {
 // SetNewLine sets the newLine value based on the received value.  If the
 // received value is not recognized, nothing is done.
 //
-// Recognized values:
+// Valid new line values:
 //    * Carriage Return (new line)
 //      * cr
 //      * CR
@@ -100,15 +107,37 @@ func (t *Transmogrifier) SetNewLine(s string) {
 	}
 }
 
+// NewLine returns the current new line sequence.
 func (t *Transmogrifier) NewLine() string {
 	return t.newLine
 }
 
+// SetFieldNames sets the names for each field; these values are used in
+// the table header as each column's, field's, name.
 func (t *Transmogrifier) SetFieldNames(vals []string) {
 	t.fieldNames = append(t.fieldNames, vals...)
 	return
 }
 
+// SetFieldAlignment sets the alignment, justification, used for each
+// field in the table.
+//
+// Valid alignment values:
+//   * Left justification
+//     * l
+//     * left
+//     * :--
+//   * Centered text
+//     * c
+//     * centered
+//     * center
+//     * :--:
+//   * Right justification
+//     * r
+//     * right
+//     * --:
+//   * No justification
+//     * empty string
 func (t *Transmogrifier) SetFieldAlignment(vals []string) {
 	for _, v := range vals {
 		v = strings.TrimSpace(strings.ToLower(v))
@@ -126,7 +155,24 @@ func (t *Transmogrifier) SetFieldAlignment(vals []string) {
 	return
 }
 
-func (t *Transmogrifier) SetFieldFmt(vals []string) {
+// SetFieldStyle sets the text styling for a record's field.
+// Accepted values:
+//    * Bold
+//      * b
+//      * bold
+//      * __
+//    * Italics
+//      * i
+//      * italics
+//      * italic
+//      * _
+//    * Strikethrough
+//      * s
+//      * strikethrough
+//      * ~~
+//    * No text styling
+//      * empty string
+func (t *Transmogrifier) SetFieldStyle(vals []string) {
 	for _, v := range vals {
 		v = strings.TrimSpace(strings.ToLower(v))
 		switch v {
@@ -171,13 +217,16 @@ func (t *Transmogrifier) SetFmt(r io.Reader) error {
 	if len(records) > 1 {
 		t.SetFieldAlignment(records[1])
 	}
-	// third row is text formatting for each field, if it exists
+	// third row is text styling for each field, if it exists
 	if len(records) > 2 {
-		t.SetFieldFmt(records[2])
+		t.SetFieldStyle(records[2])
 	}
 	return nil
 }
 
+// MDTable reads from the configured reader, CSV, and transforms the data
+// into a GitHub Style Markdown table with the applicable justification and
+// text styling.
 func (t *Transmogrifier) MDTable() error {
 	// if the field names are set, write those first
 	if len(t.fieldNames) > 0 {
