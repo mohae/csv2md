@@ -347,6 +347,11 @@ func (t *Transmogrifier) writeRecord(fields []string) error {
 	format := len(t.fieldStyle) > 0
 	end := len(fields) - 1
 	for i, field := range fields {
+		// if the field is empty, add a space to indicate to MD that there is a value
+		// otherwise columns may not end up in the correct spot.
+		if field == "" {
+			field = " "
+		}
 		if format {
 			field = fmt.Sprintf("%s%s%s", t.fieldStyle[i], field, t.fieldStyle[i])
 		}

@@ -124,15 +124,18 @@ func TestMDTable(t *testing.T) {
 	tests := []struct {
 		useFmt    bool
 		hasHeader bool
+		data      []byte
 		expected  string
 	}{
-		{false, true, "Manufacturer|Model|Type|Year  \n---|---|---|---  \nFord|Focus|Sedan|2015  \nChevy|Malibu|Sedan|2015  \n"},
-		{true, false, "Make|Model|Type|Yr  \n:--:|:--|:--|--:  \n__Manufacturer__|_Model_|Type|~~Year~~  \n__Ford__|_Focus_|Sedan|~~2015~~  \n__Chevy__|_Malibu_|Sedan|~~2015~~  \n"},
-		{true, true, "Make|Model|Type|Yr  \n:--:|:--|:--|--:  \n__Ford__|_Focus_|Sedan|~~2015~~  \n__Chevy__|_Malibu_|Sedan|~~2015~~  \n"},
+		{false, true, csvData, "Manufacturer|Model|Type|Year  \n---|---|---|---  \nFord|Focus|Sedan|2015  \nChevy|Malibu|Sedan|2015  \n"},
+		{true, false, csvData, "Make|Model|Type|Yr  \n:--:|:--|:--|--:  \n__Manufacturer__|_Model_|Type|~~Year~~  \n__Ford__|_Focus_|Sedan|~~2015~~  \n__Chevy__|_Malibu_|Sedan|~~2015~~  \n"},
+		{true, true, csvData, "Make|Model|Type|Yr  \n:--:|:--|:--|--:  \n__Ford__|_Focus_|Sedan|~~2015~~  \n__Chevy__|_Malibu_|Sedan|~~2015~~  \n"},
+		{false, false, []byte("Manufacturer,Model,Type,Year\n,Focus,Sedan,2015\n,Malibu,Sedan,2015\n"),
+			"Manufacturer|Model|Type|Year  \n |Focus|Sedan|2015  \n |Malibu|Sedan|2015  \n"},
 	}
 	for i, test := range tests {
 		var w bytes.Buffer
-		r := bytes.NewReader(csvData)
+		r := bytes.NewReader(test.data)
 		calvin := NewTransmogrifier(r, &w)
 		calvin.HasHeaderRecord = test.hasHeader
 		if test.useFmt {
